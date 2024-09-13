@@ -1,8 +1,8 @@
 [package]
 authors = ["LongYinan <lynweklm@gmail.com>"]
 edition = "2021"
-name = "napi-package-template"
-version = "0.1.0"
+name = "napi-nice"
+version = "1.0.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -10,8 +10,14 @@ version = "0.1.0"
 crate-type = ["cdylib"]
 
 [dependencies]
-napi = "2"
-napi-derive = "2"
+libc = "0.2"
+napi = { version = "3.0.0-alpha.9", default-features = false, features = [
+  "napi1",
+] }
+napi-derive = "3.0.0-alpha.8"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.58", features = ["Win32_System_Threading"] }
 
 [build-dependencies]
 napi-build = "2"
