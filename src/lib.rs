@@ -122,7 +122,10 @@ pub fn nice(incr: i32) -> Result<i32> {
 pub fn get_current_process_priority() -> Result<i32> {
   #[cfg(unix)]
   unsafe {
+    // clear the last error
+    *libc::__errno_location() = 0;
     let ret = libc::getpriority(libc::PRIO_PROCESS, 0);
+    // recheck the os error
     let os_error = std::io::Error::last_os_error();
     if let Some(err) = os_error.raw_os_error() {
       if err != 0 {
