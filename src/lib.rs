@@ -46,7 +46,11 @@ impl TryFrom<i32> for WindowsThreadPriority {
 pub fn nice(incr: i32) -> Result<i32> {
   #[cfg(unix)]
   unsafe {
-    Ok(libc::nice(incr))
+    let ret = libc::nice(incr);
+    if ret == -1 {
+      return Err(std::io::Error::last_os_error().into());
+    }
+    Ok(ret)
   }
   #[cfg(windows)]
   {
@@ -115,15 +119,22 @@ pub fn nice(incr: i32) -> Result<i32> {
 /// | THREAD_PRIORITY_LOWEST             | -2        | Priority 2 points below the priority class.                                                                                                                                                                                        |
 /// | THREAD_PRIORITY_NORMAL             | 0         | Normal priority for the priority class.                                                                                                                                                                                            |
 /// | THREAD_PRIORITY_TIME_CRITICAL      | 15        | Base priority of 15 for IDLE_PRIORITY_CLASS, BELOW_NORMAL_PRIORITY_CLASS, NORMAL_PRIORITY_CLASS, ABOVE_NORMAL_PRIORITY_CLASS, or HIGH_PRIORITY_CLASS processes, and a base priority of 31 for REALTIME_PRIORITY_CLASS processes.     |
-pub fn get_current_process_priority() -> i32 {
+pub fn get_current_process_priority() -> Result<i32> {
   #[cfg(unix)]
   unsafe {
-    libc::getpriority(libc::PRIO_PROCESS, 0)
+    let ret = libc::getpriority(libc::PRIO_PROCESS, 0);
+    let os_error = std::io::Error::last_os_error();
+    if let Some(err) = os_error.raw_os_error() {
+      if err != 0 {
+        return Err(os_error.into());
+      }
+    };
+    Ok(ret)
   }
   #[cfg(windows)]
   {
     use windows::Win32::System::Threading::{GetCurrentThread, GetThreadPriority};
 
-    unsafe { GetThreadPriority(GetCurrentThread()) }
+    Ok(unsafe { GetThreadPriority(GetCurrentThread()) })
   }
 }
