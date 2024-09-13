@@ -134,7 +134,14 @@ pub fn get_current_process_priority() -> Result<i32> {
   #[cfg(windows)]
   {
     use windows::Win32::System::Threading::{GetCurrentThread, GetThreadPriority};
+    use windows::Win32::System::WindowsProgramming::THREAD_PRIORITY_ERROR_RETURN;
 
-    Ok(unsafe { GetThreadPriority(GetCurrentThread()) })
+    let ret = unsafe { GetThreadPriority(GetCurrentThread()) };
+
+    if ret == THREAD_PRIORITY_ERROR_RETURN as i32 {
+      return Err(std::io::Error::last_os_error().into());
+    }
+
+    Ok(ret)
   }
 }
