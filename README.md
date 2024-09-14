@@ -1,85 +1,69 @@
-# `@napi-rs/package-template`
+# `@napi-rs/nice`
 
-![https://github.com/napi-rs/package-template/actions](https://github.com/napi-rs/package-template/workflows/CI/badge.svg)
+![https://github.com/Brooooooklyn/nice/actions](https://github.com/Brooooooklyn/nice/workflows/CI/badge.svg)
 
-> Template project for writing node packages with napi-rs.
+> https://linux.die.net/man/2/nice binding for Node.js
 
 # Usage
 
-1. Click **Use this template**.
-2. **Clone** your project.
-3. Run `pnpm install` to install dependencies.
-4. Run `npx napi rename -n [name]` command under the project folder to rename your package.
+## `nice`
+
+On Unix, `nice()` adds inc to the nice value for the calling process. (A higher nice value means a low priority.) Only the superuser may specify a negative increment, or priority increase. The range for nice values is described in [getpriority(2)](https://linux.die.net/man/2/getpriority).
+
+On Windows, it uses the [`SetThreadPriority`](https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setthreadpriority) function.
+
+```js
+// on Unix
+import { nice } from '@napi-rs/nice'
+
+nice(2)
+```
+
+```js
+// on Windows
+import { nice, WindowsThreadPriority } from '@napi-rs/nice'
+
+nice(WindowsThreadPriority.THREAD_PRIORITY_ABOVE_NORMAL)
+```
+
+## `getCurrentProcessPriority`
+
+This function gets the priority of the current process.
+On Unix, it uses the [`getpriority(2)`](https://linux.die.net/man/2/getpriority).
+
+On Windows, it uses the [`GetThreadPriority`](https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getthreadpriority) function.
+
+| Priority Constant             | Value      | Description                                                                                                                                                                                                                      |
+| ----------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| THREAD_MODE_BACKGROUND_BEGIN  | 0x00010000 | Begin background processing mode. The system lowers the resource scheduling priorities of the thread so that it can perform background work without significantly affecting activity in the foreground.                          |
+|                               |            | This value can be specified only if hThread is a handle to the current thread. The function fails if the thread is already in background processing mode.                                                                        |
+|                               |            | Windows Server 2003: This value is not supported.                                                                                                                                                                                |
+| THREAD_MODE_BACKGROUND_END    | 0x00020000 | End background processing mode. The system restores the resource scheduling priorities of the thread as they were before the thread entered background processing mode.                                                          |
+|                               |            | This value can be specified only if hThread is a handle to the current thread. The function fails if the thread is not in background processing mode.                                                                            |
+|                               |            | Windows Server 2003: This value is not supported.                                                                                                                                                                                |
+| THREAD_PRIORITY_ABOVE_NORMAL  | 1          | Priority 1 point above the priority class.                                                                                                                                                                                       |
+| THREAD_PRIORITY_BELOW_NORMAL  | -1         | Priority 1 point below the priority class.                                                                                                                                                                                       |
+| THREAD_PRIORITY_HIGHEST       | 2          | Priority 2 points above the priority class.                                                                                                                                                                                      |
+| THREAD_PRIORITY_IDLE          | -15        | Base priority of 1 for IDLE_PRIORITY_CLASS, BELOW_NORMAL_PRIORITY_CLASS, NORMAL_PRIORITY_CLASS, ABOVE_NORMAL_PRIORITY_CLASS, or HIGH_PRIORITY_CLASS processes, and a base priority of 16 for REALTIME_PRIORITY_CLASS processes.  |
+| THREAD_PRIORITY_LOWEST        | -2         | Priority 2 points below the priority class.                                                                                                                                                                                      |
+| THREAD_PRIORITY_NORMAL        | 0          | Normal priority for the priority class.                                                                                                                                                                                          |
+| THREAD_PRIORITY_TIME_CRITICAL | 15         | Base priority of 15 for IDLE_PRIORITY_CLASS, BELOW_NORMAL_PRIORITY_CLASS, NORMAL_PRIORITY_CLASS, ABOVE_NORMAL_PRIORITY_CLASS, or HIGH_PRIORITY_CLASS processes, and a base priority of 31 for REALTIME_PRIORITY_CLASS processes. |
 
 ## Install this test package
 
 ```
-pnpm add @napi-rs/package-template
+pnpm add @napi-rs/nice
 ```
 
-## Usage
-
-### Build
-
-After `pnpm build` command, you can see `package-template.[darwin|win32|linux].node` file in project root. This is the native addon built from [lib.rs](./src/lib.rs).
-
-### Test
-
-With [ava](https://github.com/avajs/ava), run `pnpm test` to testing native addon. You can also switch to another testing framework if you want.
-
-### CI
-
-With GitHub Actions, each commit and pull request will be built and tested automatically in [`node@18`, `node@20`] x [`macOS`, `Linux`, `Windows`] matrix. You will never be afraid of the native addon broken in these platforms.
-
-### Release
-
-Release native package is very difficult in old days. Native packages may ask developers who use it to install `build toolchain` like `gcc/llvm`, `node-gyp` or something more.
-
-With `GitHub actions`, we can easily prebuild a `binary` for major platforms. And with `N-API`, we should never be afraid of **ABI Compatible**.
-
-The other problem is how to deliver prebuild `binary` to users. Downloading it in `postinstall` script is a common way that most packages do it right now. The problem with this solution is it introduced many other packages to download binary that has not been used by `runtime codes`. The other problem is some users may not easily download the binary from `GitHub/CDN` if they are behind a private network (But in most cases, they have a private NPM mirror).
-
-In this package, we choose a better way to solve this problem. We release different `npm packages` for different platforms. And add it to `optionalDependencies` before releasing the `Major` package to npm.
-
-`NPM` will choose which native package should download from `registry` automatically. You can see [npm](./npm) dir for details. And you can also run `pnpm add @napi-rs/package-template` to see how it works.
-
-## Develop requirements
-
-- Install the latest `Rust`
-- Install `Node.js@16+` which fully supported `Node-API`
-- Run `corepack enable`
-
-## Test in local
-
-- pnpm
-- pnpm build
-- pnpm test
-
-And you will see:
-
-```bash
-$ ava --verbose
-
-  ✔ sync function from native code
-  ✔ sleep function from native code (201ms)
-  ─
-
-  2 tests passed
-✨  Done in 1.12s.
-```
-
-## Release package
-
-Ensure you have set your **NPM_TOKEN** in the `GitHub` project setting.
-
-In `Settings -> Secrets`, add **NPM_TOKEN** into it.
-
-When you want to release the package:
+or
 
 ```
-npm version [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease [--preid=<prerelease-id>] | from-git]
-
-git push
+yarn add @napi-rs/nice
 ```
 
-GitHub actions will do the rest job for you.
+or
+
+```
+npm install @napi-rs/nice
+
+```

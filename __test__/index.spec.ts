@@ -1,8 +1,13 @@
 import test from 'ava'
 
-import { plus100 } from '../index.js'
+import { nice, getCurrentProcessPriority } from '../index.js'
 
-test('sync function from native code', (t) => {
-  const fixture = 42
-  t.is(plus100(fixture), fixture + 100)
+test('should be able to call nice', (t) => {
+  t.notThrows(() => {
+    nice(1)
+  })
+})
+
+test('should be able to get current process priority', (t) => {
+  t.is(typeof getCurrentProcessPriority(), 'number')
 })
