@@ -1,10 +1,33 @@
 # `@napi-rs/nice`
 
 ![https://github.com/Brooooooklyn/nice/actions](https://github.com/Brooooooklyn/nice/workflows/CI/badge.svg)
+[![install size](https://packagephobia.com/badge?p=@napi-rs/nice)](https://packagephobia.com/result?p=@napi-rs/nice)
+[![Downloads](https://img.shields.io/npm/dm/@napi-rs/nice.svg?sanitize=true)](https://npmcharts.com/compare/@napi-rs/nice?minimal=true)
 
-> https://linux.die.net/man/2/nice binding for Node.js
+> 🚀 Help me to become a full-time open-source developer by [sponsoring me on Github](https://github.com/sponsors/Brooooooklyn)
+
+***https://linux.die.net/man/2/nice binding for Node.js***
 
 # Usage
+
+## Install this test package
+
+```
+pnpm add @napi-rs/nice
+```
+
+or
+
+```
+yarn add @napi-rs/nice
+```
+
+or
+
+```
+npm install @napi-rs/nice
+
+```
 
 ## `nice`
 
@@ -48,22 +71,3 @@ On Windows, it uses the [`GetThreadPriority`](https://docs.microsoft.com/en-us/w
 | THREAD_PRIORITY_LOWEST        | -2         | Priority 2 points below the priority class.                                                                                                                                                                                      |
 | THREAD_PRIORITY_NORMAL        | 0          | Normal priority for the priority class.                                                                                                                                                                                          |
 | THREAD_PRIORITY_TIME_CRITICAL | 15         | Base priority of 15 for IDLE_PRIORITY_CLASS, BELOW_NORMAL_PRIORITY_CLASS, NORMAL_PRIORITY_CLASS, ABOVE_NORMAL_PRIORITY_CLASS, or HIGH_PRIORITY_CLASS processes, and a base priority of 31 for REALTIME_PRIORITY_CLASS processes. |
-
-## Install this test package
-
-```
-pnpm add @napi-rs/nice
-```
-
-or
-
-```
-yarn add @napi-rs/nice
-```
-
-or
-
-```
-npm install @napi-rs/nice
-
-```

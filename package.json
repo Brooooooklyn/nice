@@ -106,5 +106,9 @@
     "singleQuote": true,
     "arrowParens": "always"
   },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/Brooooooklyn"
+  },
   "packageManager": "pnpm@9.10.0"
 }
