@@ -4,6 +4,7 @@ import { nice, getCurrentProcessPriority } from '../index.js'
 
 test('should be able to call nice', (t) => {
   t.notThrows(() => {
+    nice()
     nice(1)
   })
 })

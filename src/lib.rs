@@ -43,7 +43,8 @@ impl TryFrom<i32> for WindowsThreadPriority {
 /// On Unix, it uses the [`nice`](https://linux.die.net/man/2/nice) function.
 ///
 /// On Windows, it uses the [`SetThreadPriority`](https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setthreadpriority) function.
-pub fn nice(incr: i32) -> Result<i32> {
+pub fn nice(incr: Option<i32>) -> Result<i32> {
+  let incr = incr.unwrap_or(0);
   #[cfg(unix)]
   unsafe {
     let ret = libc::nice(incr);

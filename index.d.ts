@@ -30,7 +30,7 @@ export declare function getCurrentProcessPriority(): number
  *
  * On Windows, it uses the [`SetThreadPriority`](https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setthreadpriority) function.
  */
-export declare function nice(incr: number): number
+export declare function nice(incr?: number | undefined | null): number
 
 export declare const enum WindowsThreadPriority {
   ThreadModeBackgroundBegin = 65536,
