@@ -1,6 +1,6 @@
 {
   "name": "@napi-rs/nice",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "https://linux.die.net/man/2/nice binding for Node.js",
   "main": "nice.js",
   "types": "index.d.ts",
