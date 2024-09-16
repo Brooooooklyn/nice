@@ -65,6 +65,24 @@ jobs:
           - host: ubuntu-latest
             target: aarch64-unknown-linux-musl
             build: pnpm build --target aarch64-unknown-linux-musl -x
+          - host: ubuntu-latest
+            target: powerpc64le-unknown-linux-gnu
+            setup: |
+              sudo apt-get update
+              sudo apt-get install -y gcc-powerpc64le-linux-gnu
+            build: pnpm build --target powerpc64le-unknown-linux-gnu
+          - host: ubuntu-latest
+            target: s390x-unknown-linux-gnu
+            setup: |
+              sudo apt-get update
+              sudo apt-get install -y gcc-s390x-linux-gnu
+            build: pnpm build --target s390x-unknown-linux-gnu
+          - host: ubuntu-latest
+            target: 'riscv64gc-unknown-linux-gnu'
+            setup: |
+              sudo apt-get update
+              sudo apt-get install gcc-riscv64-linux-gnu -y
+            build: pnpm build --platform --target riscv64gc-unknown-linux-gnu
     name: stable - ${{ matrix.settings.target }} - node@20
     runs-on: ${{ matrix.settings.host }}
     steps:
@@ -216,6 +234,8 @@ jobs:
           - aarch64-unknown-linux-gnu
           - aarch64-unknown-linux-musl
           - armv7-unknown-linux-gnueabihf
+          - powerpc64le-unknown-linux-gnu
+          - s390x-unknown-linux-gnu
         node:
           - '18'
           - '20'
@@ -237,6 +257,10 @@ jobs:
               console.log('PLATFORM=linux/arm64')
             } else if ('${{ matrix.target }}'.startsWith('armv7')) {
               console.log('PLATFORM=linux/arm/v7')
+            } else if ('${{ matrix.target }}'.startsWith('powerpc64le')) {
+              console.log('PLATFORM=linux/ppc64le')
+            } else if ('${{ matrix.target }}'.startsWith('s390x')) {
+              console.log('PLATFORM=linux/s390x')
             } else {
               console.log('PLATFORM=linux/amd64')
             }
