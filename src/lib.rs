@@ -4,6 +4,7 @@ use napi::{Error, Result, Status};
 use napi_derive::napi;
 
 #[napi]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum WindowsThreadPriority {
   ThreadModeBackgroundBegin = 0x00010000,
   ThreadModeBackgroundEnd = 0x00020000,
@@ -55,47 +56,48 @@ pub fn nice(incr: Option<i32>) -> Result<i32> {
   }
   #[cfg(windows)]
   {
-    use windows::Win32::System::Threading::{GetCurrentThread, SetThreadPriority, THREAD_PRIORITY};
-
-    impl From<WindowsThreadPriority> for THREAD_PRIORITY {
-      fn from(priority: WindowsThreadPriority) -> Self {
-        match priority {
-          WindowsThreadPriority::ThreadModeBackgroundBegin => {
-            windows::Win32::System::Threading::THREAD_MODE_BACKGROUND_BEGIN
-          }
-          WindowsThreadPriority::ThreadModeBackgroundEnd => {
-            windows::Win32::System::Threading::THREAD_MODE_BACKGROUND_END
-          }
-          WindowsThreadPriority::ThreadPriorityAboveNormal => {
-            windows::Win32::System::Threading::THREAD_PRIORITY_ABOVE_NORMAL
-          }
-          WindowsThreadPriority::ThreadPriorityBelowNormal => {
-            windows::Win32::System::Threading::THREAD_PRIORITY_BELOW_NORMAL
-          }
-          WindowsThreadPriority::ThreadPriorityHighest => {
-            windows::Win32::System::Threading::THREAD_PRIORITY_HIGHEST
-          }
-          WindowsThreadPriority::ThreadPriorityIdle => {
-            windows::Win32::System::Threading::THREAD_PRIORITY_IDLE
-          }
-          WindowsThreadPriority::ThreadPriorityLowest => {
-            windows::Win32::System::Threading::THREAD_PRIORITY_LOWEST
-          }
-          WindowsThreadPriority::ThreadPriorityNormal => {
-            windows::Win32::System::Threading::THREAD_PRIORITY_NORMAL
-          }
-          WindowsThreadPriority::ThreadPriorityTimeCritical => {
-            windows::Win32::System::Threading::THREAD_PRIORITY_TIME_CRITICAL
-          }
-        }
-      }
-    }
+    use windows::Win32::System::Threading::{GetCurrentThread, SetThreadPriority};
 
     let current_thread = unsafe { GetCurrentThread() };
     let priority: WindowsThreadPriority = incr.try_into()?;
     unsafe { SetThreadPriority(current_thread, priority.into()) }
       .map_err(|e| Error::new(Status::GenericFailure, e.message().to_string()))?;
     Ok(priority as i32)
+  }
+}
+
+#[cfg(windows)]
+impl From<WindowsThreadPriority> for windows::Win32::System::Threading::THREAD_PRIORITY {
+  fn from(priority: WindowsThreadPriority) -> Self {
+    match priority {
+      WindowsThreadPriority::ThreadModeBackgroundBegin => {
+        windows::Win32::System::Threading::THREAD_MODE_BACKGROUND_BEGIN
+      }
+      WindowsThreadPriority::ThreadModeBackgroundEnd => {
+        windows::Win32::System::Threading::THREAD_MODE_BACKGROUND_END
+      }
+      WindowsThreadPriority::ThreadPriorityAboveNormal => {
+        windows::Win32::System::Threading::THREAD_PRIORITY_ABOVE_NORMAL
+      }
+      WindowsThreadPriority::ThreadPriorityBelowNormal => {
+        windows::Win32::System::Threading::THREAD_PRIORITY_BELOW_NORMAL
+      }
+      WindowsThreadPriority::ThreadPriorityHighest => {
+        windows::Win32::System::Threading::THREAD_PRIORITY_HIGHEST
+      }
+      WindowsThreadPriority::ThreadPriorityIdle => {
+        windows::Win32::System::Threading::THREAD_PRIORITY_IDLE
+      }
+      WindowsThreadPriority::ThreadPriorityLowest => {
+        windows::Win32::System::Threading::THREAD_PRIORITY_LOWEST
+      }
+      WindowsThreadPriority::ThreadPriorityNormal => {
+        windows::Win32::System::Threading::THREAD_PRIORITY_NORMAL
+      }
+      WindowsThreadPriority::ThreadPriorityTimeCritical => {
+        windows::Win32::System::Threading::THREAD_PRIORITY_TIME_CRITICAL
+      }
+    }
   }
 }
 
