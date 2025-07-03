@@ -43,4 +43,3 @@ export declare const enum WindowsThreadPriority {
   ThreadPriorityNormal = 0,
   ThreadPriorityTimeCritical = 15
 }
-
