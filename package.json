@@ -66,15 +66,15 @@
     "version": "napi version"
   },
   "devDependencies": {
-    "@napi-rs/cli": "3.0.0-alpha.91",
+    "@napi-rs/cli": "3.0.1",
     "@oxc-node/core": "^0.0.29",
     "@taplo/cli": "^0.7.0",
-    "ava": "^6.4.0",
+    "ava": "^6.4.1",
     "chalk": "^5.4.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "npm-run-all2": "^8.0.4",
-    "oxlint": "^1.5.0",
+    "oxlint": "^1.7.0",
     "prettier": "^3.6.2",
     "typescript": "^5.8.3"
   },
@@ -114,5 +114,5 @@
     "type": "github",
     "url": "https://github.com/sponsors/Brooooooklyn"
   },
-  "packageManager": "pnpm@10.12.4"
+  "packageManager": "pnpm@10.13.1"
 }
