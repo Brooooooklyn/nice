@@ -4,9 +4,6 @@ env:
   APP_NAME: nice
   MACOSX_DEPLOYMENT_TARGET: '10.13'
   CARGO_INCREMENTAL: '1'
-permissions:
-  contents: write
-  id-token: write
 'on':
   push:
     branches:
@@ -24,6 +21,35 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: ESLint
+        run: pnpm lint
+
+      - name: Cargo fmt
+        run: cargo fmt -- --check
+
+      - name: Clippy
+        run: cargo clippy
   build:
     strategy:
       fail-fast: false
@@ -83,10 +109,13 @@ jobs:
               sudo apt-get update
               sudo apt-get install gcc-riscv64-linux-gnu -y
             build: pnpm build --platform --target riscv64gc-unknown-linux-gnu
+          - host: ubuntu-latest
+            target: aarch64-unknown-linux-ohos
+            build: pnpm build --target aarch64-unknown-linux-ohos
     name: stable - ${{ matrix.settings.target }} - node@22
     runs-on: ${{ matrix.settings.host }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup node
@@ -121,6 +150,9 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           tool: cargo-zigbuild
+      - name: Setup OpenHarmony SDK
+        if: ${{ contains(matrix.settings.target, 'ohos') }}
+        uses: openharmony-rs/setup-ohos-sdk@v0.2
       - name: Setup toolchain
         run: ${{ matrix.settings.setup }}
         if: ${{ matrix.settings.setup }}
@@ -142,10 +174,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Build FreeBSD
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build
         id: build
-        uses: cross-platform-actions/action@v0.28.0
+        uses: cross-platform-actions/action@v0.29.0
         env:
           DEBUG: napi:*
           RUSTUP_IO_THREADS: 1
@@ -208,7 +240,7 @@ jobs:
           - '24'
     runs-on: ${{ matrix.settings.host }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup node
@@ -220,7 +252,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bindings-${{ matrix.settings.target }}
           path: .
@@ -254,7 +286,7 @@ jobs:
             node: '24'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup node
@@ -290,7 +322,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --force
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bindings-${{ matrix.target }}
           path: .
@@ -313,12 +345,16 @@ jobs:
   publish:
     name: Publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     needs:
+      - lint
       - build-freebsd
       - test-macOS-windows-binding
       - test-linux-binding
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup node
@@ -329,7 +365,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: artifacts
       - name: create npm dirs
@@ -341,18 +377,15 @@ jobs:
         shell: bash
       - name: Publish
         run: |
-          npm config set provenance true
+          npm install -g npm
           if git log -1 --pretty=%B | grep "^v\?[0-9]\+\.[0-9]\+\.[0-9]\+$";
           then
-            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
             npm publish --access public
           elif git log -1 --pretty=%B | grep "^v\?[0-9]\+\.[0-9]\+\.[0-9]\+";
           then
-            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
             npm publish --tag next --access public
           else
             echo "Not a release, skipping publish"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
