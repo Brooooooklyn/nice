@@ -41,5 +41,5 @@ export declare enum WindowsThreadPriority {
   ThreadPriorityIdle = -15,
   ThreadPriorityLowest = -2,
   ThreadPriorityNormal = 0,
-  ThreadPriorityTimeCritical = 15
+  ThreadPriorityTimeCritical = 15,
 }
